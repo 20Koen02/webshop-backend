@@ -51,6 +51,7 @@ class AuthController implements ControllerInterface {
           if (err) throw err;
           const user = await getUser(userBody.username);
           res.status(200).json({
+            expiresIn,
             token,
             user,
           });
