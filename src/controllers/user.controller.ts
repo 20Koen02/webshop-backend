@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import ControllerInterface from '../interfaces/controller.interface';
 
 import {
-  createUser, deleteUser, getAllUsers, getUser,
+  createUser, deleteUser, editEmail, editPassword, getAllUsers, getUser,
 } from '../crud/user.crud';
 import authMiddleware from '../middleware/auth.middleware';
 
@@ -20,6 +20,7 @@ class UserController implements ControllerInterface {
     this.router.get('/users/:username', this.getUser);
     this.router.post('/users/', this.createUser);
     this.router.delete('/users/:username', this.deleteUser);
+    this.router.put('/users/:username', this.editUser);
   }
 
   getAllUsers = async (req: Request, res: Response) => {
@@ -58,6 +59,18 @@ class UserController implements ControllerInterface {
       await deleteUser(req.params.username);
       return res.json('Successfully deleted user');
     } catch (error) {
+      return res.status(400).json(error.toString());
+    }
+  };
+
+  editUser = async (req: Request, res: Response) => {
+    try {
+      if (!req.user.admin && req.user.username !== req.params.username) return res.status(403).json('Not authorized');
+      if (req.body.email) await editEmail(req.params.username, req.body.email);
+      if (req.body.password) await editPassword(req.params.username, req.body.password);
+      return res.json('Successfully edited user');
+    } catch (error) {
+      console.log(error);
       return res.status(400).json(error.toString());
     }
   };

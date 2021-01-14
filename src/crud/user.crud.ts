@@ -47,6 +47,28 @@ export async function deleteUser(username: string): Promise<void> {
   await app.db.getRepository(User).remove(user);
 }
 
+export async function editEmail(username: string, email: string): Promise<void> {
+  const user = await app.db.getRepository(User)
+    .createQueryBuilder('user')
+    .where('user.username = :username', { username })
+    .getOne();
+  if (!user) throw new Error('Could not find user');
+  user.email = email;
+  await app.db.getRepository(User)
+    .update({ username }, user);
+}
+
+export async function editPassword(username: string, password: string): Promise<void> {
+  const user = await app.db.getRepository(User)
+    .createQueryBuilder('user')
+    .where('user.username = :username', { username })
+    .getOne();
+  if (!user) throw new Error('Could not find user');
+  user.password = await argon2.hash(password);
+  await app.db.getRepository(User)
+    .update({ username }, user);
+}
+
 export async function getLoginUser(username: string): Promise<User> {
   return app.db.getRepository(User)
     .createQueryBuilder('user')
