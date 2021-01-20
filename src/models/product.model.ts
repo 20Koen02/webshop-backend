@@ -1,8 +1,8 @@
 import {
-  Column, Entity, Index, OneToMany, PrimaryGeneratedColumn,
+  Column, Entity, Index, IsNull, OneToMany, PrimaryGeneratedColumn,
 } from 'typeorm';
 import {
-  IsNumber, IsString, IsUrl, Length, Min,
+  IsBoolean, IsNumber, IsOptional, IsString, IsUrl, Min,
 } from 'class-validator';
 import OrderProduct from './order-product.model';
 
@@ -14,12 +14,18 @@ export default class Product {
   @Column()
   @Index({ unique: true })
   @IsString()
-  @Length(2, 20)
   name!: string;
 
   @Column()
   @IsString()
   description!: string;
+
+  @Column({
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  deleted!: boolean;
 
   @Column('float')
   @IsNumber()
