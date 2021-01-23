@@ -4,7 +4,7 @@ import ControllerInterface from '../interfaces/controller.interface';
 import {
   createProduct, getAllProducts, getProduct, deleteProduct, editProduct,
 } from '../crud/product.crud';
-import authMiddleware from '../middleware/auth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 class ProductController implements ControllerInterface {
   public router = express.Router();

@@ -27,6 +27,7 @@ export default class User {
   admin!: boolean;
 
   @Column()
+  @Index({ unique: true })
   @IsEmail()
   email!: string;
 

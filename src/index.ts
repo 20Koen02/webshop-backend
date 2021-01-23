@@ -1,5 +1,7 @@
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
+import helmet from 'helmet';
+import compression from 'compression';
 import Server from './server';
 import loggerMiddleware from './middleware/logger.middleware';
 import UserController from './controllers/user.controller';
@@ -30,6 +32,8 @@ const app = new Server({
     bodyParser.urlencoded({ extended: true }),
     loggerMiddleware,
     cors(),
+    helmet(),
+    compression(),
   ],
 });
 

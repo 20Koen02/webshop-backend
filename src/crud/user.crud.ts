@@ -69,10 +69,10 @@ export async function editPassword(username: string, password: string): Promise<
     .update({ username }, user);
 }
 
-export async function getLoginUser(username: string): Promise<User> {
+export async function getLoginUser(username: string): Promise<User | undefined> {
   return app.db.getRepository(User)
     .createQueryBuilder('user')
     .select(['user.id', 'user.password'])
     .where('user.username = :username', { username })
-    .getOneOrFail();
+    .getOne();
 }

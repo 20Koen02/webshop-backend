@@ -5,7 +5,8 @@ import ControllerInterface from '../interfaces/controller.interface';
 import {
   createUser, deleteUser, editEmail, editPassword, getAllUsers, getUser,
 } from '../crud/user.crud';
-import authMiddleware from '../middleware/auth.middleware';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.middleware';
+import app from '../index';
 
 class UserController implements ControllerInterface {
   public router = express.Router();
@@ -15,12 +16,11 @@ class UserController implements ControllerInterface {
   }
 
   public initRoutes() {
-    this.router.use('/users', authMiddleware);
-    this.router.get('/users', this.getAllUsers);
-    this.router.get('/users/:username', this.getUser);
-    this.router.post('/users/', this.createUser);
-    this.router.delete('/users/:username', this.deleteUser);
-    this.router.put('/users/:username', this.editUser);
+    this.router.get('/users', authMiddleware, this.getAllUsers);
+    this.router.get('/users/:username', authMiddleware, this.getUser);
+    this.router.post('/users/', optionalAuthMiddleware, this.createUser);
+    this.router.delete('/users/:username', authMiddleware, this.deleteUser);
+    this.router.put('/users/:username', authMiddleware, this.editUser);
   }
 
   getAllUsers = async (req: Request, res: Response) => {
@@ -45,9 +45,21 @@ class UserController implements ControllerInterface {
 
   createUser = async (req: Request, res: Response) => {
     try {
-      if (!req.user.admin) return res.status(403).json('Not authorized');
-      await createUser(req.body);
-      return res.json('Successfully created user');
+      if (!req.user?.admin) {
+        if (req.body.admin) return res.status(400).json('Not authorized to create admin user');
+        req.body.admin = false;
+        if (!req.body['g-recaptcha-response']) return res.status(400).json('No recaptcha present');
+        app.recaptcha.verify(req, async (error) => {
+          if (!error) {
+            await createUser(req.body);
+            return res.json('Successfully created user');
+          }
+          return res.status(400).json('Invalid Recaptcha');
+        });
+      } else {
+        await createUser(req.body);
+        return res.json('Successfully created user');
+      }
     } catch (error) {
       return res.status(400).json(error.toString());
     }
