@@ -18,7 +18,7 @@ export default class User {
   @Length(2, 20)
   username!: string;
 
-  @Column()
+  @Column({ select: false })
   @IsString()
   password!: string;
 
@@ -34,7 +34,9 @@ export default class User {
   @OneToMany(() => Order, (order) => order.user)
   orders!: Order[];
 
-  @OneToOne(() => Cart)
+  @OneToOne(() => Cart, (cart) => cart.user)
   @JoinColumn()
   cart!: Cart;
+
+  ordercount!: number;
 }

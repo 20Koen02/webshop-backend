@@ -1,7 +1,7 @@
 import {
   Column, Entity, ManyToOne, PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IsDate, Min } from 'class-validator';
+import { Min } from 'class-validator';
 import Product from './product.model';
 import Cart from './cart.model';
 
@@ -19,8 +19,4 @@ export default class CartProduct {
 
   @ManyToOne(() => Cart, (cart) => cart.products)
   cart!: Cart;
-
-  @Column()
-  @IsDate()
-  addedDate!: Date;
 }

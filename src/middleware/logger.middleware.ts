@@ -11,7 +11,7 @@ const loggerMiddleware = (req: Request, res: Response, next: any) => {
   const date = new Date();
   const start = process.hrtime();
   const durationInMilliseconds = getRequestDuration(start);
-  console.log(`[${chalk.yellow(process.pid)}] [${chalk.blue(strftime('%Y-%m-%d %H:%M:%S', date))}] ${req.method}:${req.url} ${chalk.red(`${durationInMilliseconds.toLocaleString()}ms`)}`);
+  console.log(`[${chalk.yellow(process.pid)}] [${chalk.green(req.ip)}] [${chalk.blue(strftime('%Y-%m-%d %H:%M:%S', date))}] ${chalk.cyan(req.method)}: ${req.url} ${chalk.red(`${durationInMilliseconds.toLocaleString()}ms`)}`);
   next();
 };
 

@@ -11,12 +11,33 @@ async function getUser(username: string) {
     .getOneOrFail();
 }
 
+async function getOrderCount(username: string) {
+  const userWithCount = await app.db.getRepository(User)
+    .createQueryBuilder('user')
+    .loadRelationCountAndMap('user.ordercount', 'user.orders')
+    .where('user.username = :username', { username })
+    .getOneOrFail();
+  return userWithCount.ordercount;
+}
+
+export async function getAllOrdersFromAllUsers(): Promise<Order[]> {
+  return app.db.getRepository(Order)
+    .createQueryBuilder('order')
+    .leftJoinAndSelect('order.products', 'orderProduct')
+    .leftJoinAndSelect('orderProduct.product', 'product')
+    .leftJoinAndSelect('order.user', 'user')
+    .getMany();
+}
+
 export async function getAllOrders(username: string): Promise<Order[]> {
   const user = await getUser(username);
 
   return app.db.getRepository(Order)
     .createQueryBuilder('order')
     .where('order.user = :userId', { userId: user.id })
+    .leftJoinAndSelect('order.products', 'orderProduct')
+    .leftJoinAndSelect('orderProduct.product', 'product')
+    .leftJoinAndSelect('order.user', 'user')
     .getMany();
 }
 
@@ -32,8 +53,12 @@ export async function getOrder(username: string, orderId: string): Promise<Order
     .getOneOrFail();
 }
 
-export async function addOrder(username: string, body: any): Promise<void> {
+export async function addOrder(username: string, body: any): Promise<Order> {
   const user = await getUser(username);
+
+  if (await getOrderCount(username) > 25) {
+    throw new Error('Your order limit has been reached');
+  }
 
   const order = new Order();
   order.orderDate = new Date();
@@ -45,6 +70,8 @@ export async function addOrder(username: string, body: any): Promise<void> {
     .relation(User, 'orders')
     .of(user)
     .add(order);
+
+  return order;
 }
 
 export async function deleteOrder(username: string, orderId: string): Promise<void> {
@@ -68,13 +95,20 @@ async function getProduct(name: string) {
 }
 
 /* eslint no-await-in-loop: "off" */
-export async function addProductsToOrder(username: string, orderId: string, body: any[]) {
+export async function setProductsInOrder(username: string, orderId: string, body: any[]) {
   const user = await getUser(username);
   const order = await app.db.getRepository(Order)
     .createQueryBuilder('order')
     .where('order.user = :userId', { userId: user.id })
     .andWhere('order.id = :orderId', { orderId })
     .getOneOrFail();
+
+  const oldOrderProducts = await app.db.getRepository(OrderProduct)
+    .createQueryBuilder('orderProduct')
+    .where('orderProduct.order = :orderId', { orderId: order.id })
+    .getMany();
+
+  await app.db.getRepository(OrderProduct).remove(oldOrderProducts);
 
   for (const p of body) {
     const orderProduct = new OrderProduct();
