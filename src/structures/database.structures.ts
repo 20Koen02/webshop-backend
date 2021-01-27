@@ -1,6 +1,7 @@
 import { ConnectionManager } from 'typeorm';
 import { join } from 'path';
 import {
+  dbHost,
   dbName, dbPassword, dbPort, dbUser,
 } from '../config';
 
@@ -13,6 +14,7 @@ connectionManager.create({
   username: dbUser,
   password: dbPassword,
   port: dbPort,
+  host: dbHost,
   entities: [join(__dirname, '..', 'models/*{.js,.ts}')],
 });
 

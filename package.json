@@ -4,8 +4,7 @@
   "description": "Webshop Backend for IPRWC",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf ./build",
-    "build": "npm run clean && tsc",
+    "build": "tsc -p ./tsconfig.json",
     "start": "npm run build && node build/clusters.js",
     "start:dev": "nodemon"
   },
