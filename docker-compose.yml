@@ -2,7 +2,6 @@ version: '3.8'
 services:
   db:
     image: postgres
-    container_name: webshop-db
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -10,13 +9,7 @@ services:
 
   backend:
     build: .
-    container_name: webshop-backend
     restart: unless-stopped
     ports:
       - "5500:5500"
     env_file: .env
-
-networks:
-  default:
-    external:
-      name: caddy

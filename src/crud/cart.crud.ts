@@ -16,7 +16,7 @@ export async function getCart(username: string): Promise<Cart> {
 
   return app.db.getRepository(Cart)
     .createQueryBuilder('cart')
-    .leftJoin('cart.user', user.id)
+    .leftJoin('cart.user', 'user', 'user.id=:userId', { userId: user.id })
     .leftJoinAndSelect('cart.products', 'cartproducts')
     .leftJoinAndSelect('cartproducts.product', 'product')
     .getOneOrFail();
@@ -34,7 +34,7 @@ export async function setProductsInCart(username: string, body: any[]) {
   const user = await getUser(username);
   const cart = await app.db.getRepository(Cart)
     .createQueryBuilder('cart')
-    .leftJoin('cart.user', user.id)
+    .leftJoin('cart.user', 'user', 'user.id=:userId', { userId: user.id })
     .getOneOrFail();
 
   const oldCartProducts = await app.db.getRepository(CartProduct)
